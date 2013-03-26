@@ -1,0 +1,1 @@
+C:\Development\almostpurple.com\FrameworkTests\SqlDomTest\bin\Debug\SqlDomTest.exe.config
