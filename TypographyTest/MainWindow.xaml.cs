@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace WpfTest
+namespace TypographyTest
 {
   /// <summary>
   /// Interaction logic for MainWindow.xaml
@@ -25,20 +26,15 @@ namespace WpfTest
       InitializeComponent();
     }
 
-    private void Button1_Click(object sender, RoutedEventArgs e)
+    private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-      var c = new Color();
-      c.A = 255;
-      c.R = 255;
-      c.G = 0;
-      c.B = 0;
-      int hash = c.GetHashCode();
-      //var values = c.GetNativeColorValues();
+      using (var reader = new StreamReader(@"c:\incoming\wordprocessor\art-of-war-preface.txt"))
+        Editor.Document = PersistenceController.LoadFromText(reader);
     }
 
-    private void Window_Loaded_1(object sender, RoutedEventArgs e)
-    {
-      // Button1.Click is an event
-    }
+    Content.PersistenceEngine PersistenceController = new Content.PersistenceEngine();
+    Layout.LayoutEngine LayoutController = new Layout.LayoutEngine();
+    Content.Document Document;
+    Layout.Section Section;
   }
 }

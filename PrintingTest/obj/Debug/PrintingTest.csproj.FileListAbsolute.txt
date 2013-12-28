@@ -1,6 +1,6 @@
-C:\Development\almostpurple.com\FrameworkTests\PrintingTest\bin\Debug\PrintingTest.exe.config
-C:\Development\almostpurple.com\FrameworkTests\PrintingTest\bin\Debug\PrintingTest.exe
-C:\Development\almostpurple.com\FrameworkTests\PrintingTest\bin\Debug\PrintingTest.pdb
-C:\Development\almostpurple.com\FrameworkTests\PrintingTest\obj\Debug\PrintingTest.exe
-C:\Development\almostpurple.com\FrameworkTests\PrintingTest\obj\Debug\PrintingTest.pdb
-C:\Development\almostpurple.com\FrameworkTests\PrintingTest\obj\Debug\PrintingTest.csprojResolveAssemblyReference.cache
+C:\Development\GitHub\FrameworkTests\PrintingTest\bin\Debug\PrintingTest.exe.config
+C:\Development\GitHub\FrameworkTests\PrintingTest\obj\Debug\PrintingTest.csprojResolveAssemblyReference.cache
+C:\Development\GitHub\FrameworkTests\PrintingTest\bin\Debug\PrintingTest.exe
+C:\Development\GitHub\FrameworkTests\PrintingTest\bin\Debug\PrintingTest.pdb
+C:\Development\GitHub\FrameworkTests\PrintingTest\obj\Debug\PrintingTest.exe
+C:\Development\GitHub\FrameworkTests\PrintingTest\obj\Debug\PrintingTest.pdb

@@ -36,6 +36,10 @@ namespace ReflectionTest
   {
     static void Main(string[] args)
     {
+      DateTime? a = new DateTime(1899, 12, 31);
+      var b = new DateTime(2013, 4, 9);
+      var d = a.Value.Subtract(b);
+
       var configuration = new Configuration()
       {
         Username = "gavin",

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -7,7 +8,7 @@ using System.Xml;
 namespace XmlTest {
   class Program {
     static void Main(string[] args) {
-      var content1 = "<WordProcessor><Table Background=\"red\" Background=\"green\" Style=\"foo\"><Row><Cell/></Row></Table></WordProcessor>";
+      /*var content1 = "<WordProcessor><Table Background=\"red\" Background=\"green\" Style=\"foo\"><Row><Cell/></Row></Table></WordProcessor>";
       //XmlDocument doc1 = new XmlDocument();
       //doc1.LoadXml(content1);
 
@@ -32,8 +33,38 @@ namespace XmlTest {
 
         Console.WriteLine("studyUID={0}&seriesUID={1}&objectUID={2}", 
           studyUID.InnerText, seriesUID.InnerText, objectUID.InnerText);
-      }
-      
+      }*/
+
+      /*var settings = new XmlReaderSettings();
+      var reader = XmlReader.Create(File.OpenRead(@"..\..\sample1.xml"), settings);
+      while (reader.Read())
+        Console.WriteLine("{0}, {1}, {2}, {3}", reader.LocalName, reader.Name, reader.NamespaceURI, reader.Prefix);*/
+
+      /*var settings = new XmlWriterSettings();
+      var writer = XmlWriter.Create(File.Create(@"..\..\sample2.xml"), settings);
+      writer.WriteStartDocument();
+      writer.WriteStartElement("book", "urn:loc.gov:books");
+      writer.WriteAttributeString("xmlns", "isbn", null, "urn:ISBN:0-395-36341-6");
+      writer.WriteElementString("title", "Cheaper by the Dozen");
+      writer.WriteElementString("number", "urn:ISBN:0-395-36341-6", "1568491379");
+      writer.WriteEndElement();
+      writer.Close();*/
+
+      /*var settings = new XmlWriterSettings();
+      var writer = XmlWriter.Create(File.Create(@"..\..\sample3.xml"), settings);
+      writer.WriteStartDocument();
+      writer.WriteStartElement("Personnel", null);
+      writer.WriteAttributeString("xmlns", "xsi", null, "http://www.w3.org/2001/XMLSchema-instance");
+      writer.WriteAttributeString("noNamespaceSchemaLocation", "http://www.w3.org/2001/XMLSchema-instance", "PersonnelSchema.xsd");
+      writer.WriteStartElement("CREATE");
+      writer.WriteStartElement("NewPerson");
+      writer.WriteElementString("FirstName", "Callan");
+      writer.WriteEndElement();
+      writer.Close();*/
+
+      var document = new XmlDocument();
+      document.
+
       Console.WriteLine();
     }
   }

@@ -32,6 +32,11 @@ namespace AsyncTest
   {
     static void Main(string[] args)
     {
+      Parallel.Invoke( () => { }, () => { });
+
+      IObservable
+
+
       var karismatest = IPAddress.Parse("10.250.2.51");
       var endpoints = new IPEndPoint[] { 
         new IPEndPoint(karismatest, 40102),

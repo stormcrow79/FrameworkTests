@@ -9,6 +9,9 @@ using System.Windows;
 using System.Windows.Media;
 using System.Globalization;
 using System.Windows.Media.Imaging;
+using System.Windows.Controls;
+using System.Windows.Xps.Packaging;
+using System.Threading;
 
 namespace PrintingTest
 {
@@ -66,8 +69,101 @@ namespace PrintingTest
         }
       }
     }
+
+    class MyPaginator : DocumentPaginator
+    {
+      class MySource : IDocumentPaginatorSource
+      {
+        public MySource(MyPaginator paginator)
+        {
+          this.DocumentPaginator = paginator;
+        }
+        public DocumentPaginator DocumentPaginator { get; set; }
+      }
+
+      public Size A4P = new Size(210.0 / 25.4 * 96.0, 297.0 / 25.4 * 96.0);
+      public Size A4L = new Size(297.0 / 25.4 * 96.0, 210.0 / 25.4 * 96.0);
+
+      public override DocumentPage GetPage(int pageNumber)
+      {
+        var page = new FixedPage();
+
+        var drawing = new DrawingVisual();
+        var context = drawing.RenderOpen();
+        context.DrawText(new FormattedText("Hello world", CultureInfo.CurrentCulture, FlowDirection.LeftToRight, 
+          new Typeface("Consolas"), 11.0, Brushes.Black), new Point(64, 64));
+        context.Close();
+        var result = new DocumentPage(drawing);
+      }
+
+      public override bool IsPageCountValid
+      {
+        get { return true; }
+      }
+
+      public override int PageCount
+      {
+        get { return 1; }
+      }
+
+      public override Size PageSize
+      {
+        get
+        {
+          var ms = new PageMediaSize(PageMediaSizeName.ISOA4);
+          return new Size(ms.Width.Value, ms.Height.Value);
+        }
+        set
+        {
+          throw new NotImplementedException();
+        }
+      }
+
+      public override IDocumentPaginatorSource Source
+      {
+        get { return new MySource(this); }
+      }
+    }
+
+    static void Test1()
+    {
+      var page = new FixedPage();
+
+
+
+      var server = new PrintServer();
+      var queue = server
+        .GetPrintQueues(new[] { EnumeratedPrintQueueTypes.Local, EnumeratedPrintQueueTypes.Connections })
+        //.Single(q => q.Name == "TOSHIBA e-STUDIO4520CSeriesPCL6");
+        .Single(q => q.Name == "novaPDF");
+      var writer = System.Printing.PrintQueue.CreateXpsDocumentWriter(queue);
+      queue.CurrentJobSettings.Description = DateTime.Now.ToString();
+
+      var ticket = new PrintTicket()
+      {
+        PageMediaSize = new PageMediaSize(PageMediaSizeName.ISOA4)
+        //PageOrientation = PageOrientation.ReverseLandscape
+      };
+
+      writer.Write(new MyPaginator(), ticket);
+    }
+
+    [STAThread]
     static void Main(string[] args)
     {
+      Test1(); return;
+      
+      /*var window = new Window();
+      var viewer = new DocumentViewer();
+      viewer.Document = new XpsDocument(@"C:\Incoming\wordprocessor\art-of-war-ch1-4.xps", System.IO.FileAccess.Read).GetFixedDocumentSequence();
+      window.Content = viewer;
+      window.Show();
+
+      var app = new Application();
+      app.Run(window);
+
+      return;*/
+
       DrawingContext context;
       GlyphTypeface glyphTypeface;
       face.TryGetGlyphTypeface(out glyphTypeface);
@@ -93,10 +189,9 @@ namespace PrintingTest
 
       var image = new BitmapImage(new Uri(@"file:///c:\incoming\pos\lrsc.png"));
 
-      var server = new PrintServer();
+      var server = new PrintServer();      
       var queue = new PrintQueue(server, "EPSON TM-T88V Receipt");
       queue.UserPrintTicket = new PrintTicket() { PageMediaSize = new PageMediaSize(MmToPx(80), MmToPx(1)) };
-
       var writer = PrintQueue.CreateXpsDocumentWriter(queue);
       writer.WritingPrintTicketRequired += (sender, e) =>
       {
