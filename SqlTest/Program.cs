@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Xml;
 
 namespace SqlTest {
@@ -37,8 +38,45 @@ namespace SqlTest {
       var result = connection.CreateCommand();
       return result;
     }
+
     static void Main(string[] args) {
       Stopwatch timer;
+
+      using (var connection = new OdbcConnection("Driver={SQL Server Native Client 11.0};Server=gavinm\\sql2012;Database=Perf_CAPITAL;Trusted_Connection=yes"))
+      using (var command = connection.CreateCommand())
+      {
+        connection.Open();
+        command.CommandText = "SELECT * FROM Module WHERE [Key] = ? OR Name = ?";
+        //command.Parameters.Add("Key", OdbcType.Int).Value = 2;
+        //command.Parameters.AddWithValue("?", "2");
+        //command.Parameters.AddWithValue("?", "2");
+        using (var reader = command.ExecuteReader())
+        {
+          while (reader.Read())
+          {
+            //Thread.Sleep(500);
+          }
+        }
+      }
+
+      return;
+
+      using (var connection = new SqlConnection("Data Source=gavinm\\r2std;Initial Catalog=IC_Dev;Integrated Security=SSPI"))
+      using (var command = connection.CreateCommand())
+      {
+        var dt = new DataTable();
+        dt.Columns.Add("Data", typeof(int));
+        var row = dt.Rows.Add(1);
+
+        connection.Open();
+        command.CommandText = "SELECT [Key] FROM [Current].[Karisma.Patient.Record] WHERE [Key] IN (SELECT [Data] FROM @KeySet)";
+        var param = command.Parameters.Add("@KeySet", SqlDbType.Structured);
+        param.TypeName = "System.KeySet";
+        param.Value = dt;
+        using (var reader = command.ExecuteReader())
+          while (reader.Read())
+            Console.WriteLine(reader.GetInt32(0));
+      }
 
       DataRow[] rows = new DataRow[1000000];
 
@@ -154,6 +192,7 @@ namespace SqlTest {
     }
   }
 
+  #region FakeReader
   class FakeReader : IDataReader
   {
     int count;
@@ -334,5 +373,5 @@ namespace SqlTest {
       get { throw new NotImplementedException(); }
     }
   }
-
+  #endregion
 }
