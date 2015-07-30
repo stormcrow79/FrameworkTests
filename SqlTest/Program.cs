@@ -42,6 +42,18 @@ namespace SqlTest {
     static void Main(string[] args) {
       Stopwatch timer;
 
+      using (var connection = new SqlConnection("Data Source=gavinm\\std12;Initial Catalog=capital_311;Integrated Security=SSPI"))
+      using (var command = connection.CreateCommand())
+      {
+        connection.Open();
+        command.CommandText = "DBCC USEROPTIONS";
+        using (var reader = command.ExecuteReader())
+          while (reader.Read())
+            Console.WriteLine(string.Format("{0}, {1}", reader[0], reader[1]));
+      }
+      
+      return;
+
       using (var connection = new OdbcConnection("Driver={SQL Server Native Client 11.0};Server=gavinm\\sql2012;Database=Perf_CAPITAL;Trusted_Connection=yes"))
       using (var command = connection.CreateCommand())
       {

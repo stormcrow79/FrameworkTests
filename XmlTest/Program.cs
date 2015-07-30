@@ -62,10 +62,25 @@ namespace XmlTest {
       writer.WriteEndElement();
       writer.Close();*/
 
-      var document = new XmlDocument();
-      document.
+      var settings = new XmlWriterSettings() { 
+        Indent = true, 
+        NamespaceHandling = NamespaceHandling.OmitDuplicates, 
+        OmitXmlDeclaration = true, 
+        Encoding = Encoding.GetEncoding(1252)
+      };
 
-      Console.WriteLine();
+      using (var writer = System.Xml.XmlWriter.Create(@"c:\incoming\out.xml", settings))
+      {
+        writer.WriteStartDocument();
+        writer.WriteStartElement("WordProcessor");
+        writer.WriteStartElement("Field");
+        writer.WriteString("");
+        writer.WriteEndElement();
+        writer.WriteEndElement();
+        writer.WriteEndDocument();
+      }
+
+      //Console.ReadLine();
     }
   }
 }
