@@ -26,32 +26,14 @@ namespace CngTest
     {
       try
       {
+        //RecreateKey("test1", 4096);
 
-        //var key1 = NCrypt.CreateKey(CngProvider.MicrosoftSoftwareKeyStorageProvider, "foofoo");
+        var privateKey = CngKey.Import(File.ReadAllBytes(@"C:\Connect\key\test1-private"), CngKeyBlobFormat.GenericPrivateBlob);
+        var cipherText = Encrypt(privateKey, Encoding.UTF8.GetBytes("Hello crypto"));
 
-        var sender = "ifr";
-        var recipient = "rg";
-
-        var provider = CngProvider.MicrosoftSoftwareKeyStorageProvider;
-        var alg = CngAlgorithm.Rsa;
-
-        var createParams = new CngKeyCreationParameters()
-        {
-          Provider = provider,
-          KeyCreationOptions = CngKeyCreationOptions.OverwriteExistingKey
-        };
-        createParams.Parameters.Add(new CngProperty("Length", BitConverter.GetBytes(4096), CngPropertyOptions.None));
-
-        var exists = CngKey.Exists("testkey1", provider, CngKeyOpenOptions.None);
-        CngKey key = //exists ? CngKey.Open("testkey1", provider) :
-          CngKey.Create(alg, "testkey1", createParams);
-
-        var plainText = Encoding.UTF8.GetBytes("Hello crypto");
-
-        var rsa = new RSACng(key);
-        var cipherText = rsa.Encrypt(plainText, RSAEncryptionPadding.OaepSHA256);
-
-
+        var publicKey = CngKey.Import(File.ReadAllBytes(@"C:\Connect\Key\test1-public"), CngKeyBlobFormat.GenericPublicBlob);
+        var plainText = Decrypt(publicKey, cipherText);
+        Console.WriteLine(Encoding.UTF8.GetString(plainText));
 
         Console.WriteLine("Success");
       }
@@ -59,7 +41,38 @@ namespace CngTest
       {
         Console.WriteLine(ex.Message);
       }
+      Console.ReadLine();
     }
+
+    static CngKey RecreateKey(string name, int length)
+    {
+      var createParams = new CngKeyCreationParameters()
+      {
+        KeyCreationOptions = CngKeyCreationOptions.OverwriteExistingKey,
+        ExportPolicy = CngExportPolicies.AllowPlaintextExport
+      };
+
+      createParams.Parameters.Add(new CngProperty("Length", BitConverter.GetBytes(length), CngPropertyOptions.None));
+      var exists = CngKey.Exists(name, CngProvider.MicrosoftSoftwareKeyStorageProvider, CngKeyOpenOptions.None);
+      var key = CngKey.Create(CngAlgorithm.Rsa, name, createParams);
+
+      File.WriteAllBytes(@"C:\Connect\key\" + name + "-private", key.Export(CngKeyBlobFormat.GenericPrivateBlob));
+      File.WriteAllBytes(@"C:\Connect\key\" + name + "-public",  key.Export(CngKeyBlobFormat.GenericPublicBlob));
+
+      return key;
+    }
+
+    static byte[] Encrypt(CngKey key, byte[] plainText)
+    {
+      var rsa = new RSACng(key);
+      return rsa.Encrypt(plainText, RSAEncryptionPadding.Pkcs1);
+    }
+
+    static byte[] Decrypt(CngKey key, byte[] cipherText)
+    {
+      var rsa = new RSACng(key);
+      return rsa.Decrypt(cipherText, RSAEncryptionPadding.Pkcs1);
+    } 
   }
 
   static class NCrypt
