@@ -64,7 +64,7 @@ namespace XmlTest {
 
       var settings = new XmlWriterSettings() { 
         Indent = true, 
-        NamespaceHandling = NamespaceHandling.OmitDuplicates, 
+        //NamespaceHandling = NamespaceHandling.OmitDuplicates, 
         OmitXmlDeclaration = true, 
         Encoding = Encoding.GetEncoding(1252)
       };

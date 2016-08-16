@@ -12,6 +12,12 @@ namespace JsonTest
   {
     static void Main(string[] args)
     {
+      dynamic dt = JsonConvert.DeserializeObject("\"2016-05-06T16:15:00\"");
+      Console.WriteLine(dt.Date);
+
+      dynamic payload = JsonConvert.DeserializeObject(File.ReadAllText(@"..\..\payload.json"));
+      Console.WriteLine(payload.data.ServiceDateTime.Value.Date);
+
       JsonConverter x;
       dynamic config = JsonConvert.DeserializeObject(File.ReadAllText("config.json"));
       Console.WriteLine(config);

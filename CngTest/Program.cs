@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,27 +14,16 @@ namespace CngTest
 {
   class Program
   {
-    static void ExportStrongKey()
-    {
-      var rsa1 = new RSACng();
-      var pri = rsa1.Key.Export(CngKeyBlobFormat.GenericPrivateBlob);
-      var pub = rsa1.Key.Export(CngKeyBlobFormat.GenericPublicBlob);
-
-      File.WriteAllBytes(@"C:\Connect\key\ifr_pri", pri);
-      File.WriteAllBytes(@"C:\Connect\key\ifr_pub", pub);
-    }
     static void Main(string[] args)
     {
       try
       {
-        //RecreateKey("test1", 4096);
+        var cer = new X509Certificate2(@"C:\Incoming\mobile-certs\karisma-kestral.cer");
+        var pfx = new X509Certificate2(@"C:\Incoming\mobile-certs\karisma-kestral.pfx", "number1!");
 
-        var privateKey = CngKey.Import(File.ReadAllBytes(@"C:\Connect\key\test1-private"), CngKeyBlobFormat.GenericPrivateBlob);
-        var cipherText = Encrypt(privateKey, Encoding.UTF8.GetBytes("Hello crypto"));
-
-        var publicKey = CngKey.Import(File.ReadAllBytes(@"C:\Connect\Key\test1-public"), CngKeyBlobFormat.GenericPublicBlob);
-        var plainText = Decrypt(publicKey, cipherText);
-        Console.WriteLine(Encoding.UTF8.GetString(plainText));
+        var keyName = "test1";
+        var key = RecreateKey(keyName, 4096); key.Delete(); key.Dispose();
+        RSAEncrypt(keyName);
 
         Console.WriteLine("Success");
       }
@@ -62,6 +52,16 @@ namespace CngTest
       return key;
     }
 
+    private static void RSAEncrypt(string keyName)
+    {
+      var publicKey = CngKey.Import(File.ReadAllBytes(@"C:\Connect\Key\" + keyName + "-public"), CngKeyBlobFormat.GenericPublicBlob);
+      var cipherText = Encrypt(publicKey, Encoding.UTF8.GetBytes("Hello crypto"));
+
+      var privateKey = CngKey.Import(File.ReadAllBytes(@"C:\Connect\key\" + keyName + "-private"), CngKeyBlobFormat.GenericPrivateBlob);
+      var plainText = Decrypt(privateKey, cipherText);
+      Console.WriteLine(Encoding.UTF8.GetString(plainText));
+    }
+
     static byte[] Encrypt(CngKey key, byte[] plainText)
     {
       var rsa = new RSACng(key);
@@ -73,6 +73,20 @@ namespace CngTest
       var rsa = new RSACng(key);
       return rsa.Decrypt(cipherText, RSAEncryptionPadding.Pkcs1);
     } 
+  }
+
+  static class BCrypt
+  {
+    [DllImport("bcrypt.dll", CharSet = CharSet.Auto)]
+    public static extern int BCryptOpenAlgorithmProvider(out IntPtr phAlgorithm, string pszAlgId, string pszImplementation, int dwFlags);
+    [DllImport("bcrypt.dll", CharSet = CharSet.Auto)]
+    public static extern int BCryptCloseAlgorithmProvider(IntPtr hAlgorithm, int dwFlags);
+
+    [DllImport("bcrypt.dll", CharSet = CharSet.Auto)]
+    public static extern int BCryptImportKeyPair(IntPtr hAlgorithm, IntPtr hImportKey, string pszBlobType, out IntPtr phKey, byte[] pbInput, int cbInput, int dwFlags);
+
+    [DllImport("bcrypt.dll", CharSet = CharSet.Auto)]
+    public static extern int BCryptDestroyKey(IntPtr hKey);
   }
 
   static class NCrypt
@@ -113,16 +127,16 @@ namespace CngTest
     }
 
     [DllImport("ncrypt.dll", CharSet = CharSet.Auto)]
-    static extern int NCryptOpenStorageProvider(out IntPtr phProvider, string pszProviderName, int dwFlags);
+    public static extern int NCryptOpenStorageProvider(out IntPtr phProvider, string pszProviderName, int dwFlags);
     [DllImport("ncrypt.dll", CharSet = CharSet.Auto)]
-    static extern int NCryptCreatePersistedKey(IntPtr hProvider, out IntPtr phKey, string pszAlgId, string pszKeyName, int dwLegacyKeySpec, int dwFlags);
+    public static extern int NCryptCreatePersistedKey(IntPtr hProvider, out IntPtr phKey, string pszAlgId, string pszKeyName, int dwLegacyKeySpec, int dwFlags);
     [DllImport("ncrypt.dll", CharSet = CharSet.Auto)]
-    static extern int NCryptGetProperty(IntPtr hObject, string pszProperty, byte[] pbOutput, int cbOutput, out int pcbResult, int dwFlags);
+    public static extern int NCryptGetProperty(IntPtr hObject, string pszProperty, byte[] pbOutput, int cbOutput, out int pcbResult, int dwFlags);
     [DllImport("ncrypt.dll", CharSet = CharSet.Auto)]
-    static extern int NCryptSetProperty(IntPtr hObject, string pszProperty, byte[] pbInput, int cbInput, int dwFlags);
-    [DllImport("ncrypt.dll")]
-    static extern int NCryptFinalizeKey(IntPtr hKey, int dwFlags);
-    [DllImport("ncrypt.dll")]
-    static extern int NCryptFreeObject(IntPtr hObject);
+    public static extern int NCryptSetProperty(IntPtr hObject, string pszProperty, byte[] pbInput, int cbInput, int dwFlags);
+    [DllImport("ncrypt.dll", CharSet = CharSet.Auto)]
+    public static extern int NCryptFinalizeKey(IntPtr hKey, int dwFlags);
+    [DllImport("ncrypt.dll", CharSet = CharSet.Auto)]
+    public static extern int NCryptFreeObject(IntPtr hObject);
   }
 }

@@ -1,0 +1,19 @@
+﻿{
+  "context": { "stepkey": 3128 },
+  "data": {
+    "PatientTitle": "",
+    "PatientFirstName": "Katrina",
+    "PatientSurname": "Kestral",
+    "WorkSiteName": "Private Worksite",
+    "WorkSiteAddress": "Private Worksite\r\n137 Main Street",
+    "WorkSiteSuburb": "OSBORNE PARK",
+    "WorkSitePostCode": "6017",
+    "WorkSitePhone": "0892025555",
+    "WorkSiteEmail": "support@kestral.com.au",
+    "ServiceDateTime": "2016-05-10T16:30:00",
+    "ServiceName": "Barium Swallow",
+    "ServiceDescription": "Barium Swallow",
+    "ServiceDepartment": "Screening",
+    "PreparationNotes": [ "<p>\r\nSome barium prep\r\n<\/p>\r\n", "<p>\r\nSome general notes\r\n<\/p>\r\n" ]
+  }
+}

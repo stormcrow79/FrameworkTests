@@ -35,10 +35,14 @@ namespace ReflectionTest
       Console.Write("IFoo.Test");
     }*/
   }
+
   class Program
   {
     static void Main(string[] args)
     {
+      dynamic lala = null;
+      lala.KeepAlive();
+
       var a = "a";
       var b = "b";
       var c = a + b;

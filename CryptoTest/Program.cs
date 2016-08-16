@@ -8,8 +8,37 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
 using System.Xml;
+using System.Net.Security;
 
 namespace CryptoTest {
+  class Program
+  {
+    static void Main(string[] args)
+    {
+      var ssl = new SslStream(File.Create(@"c:\incoming\ssl.dat"));
+      //‎b9 2e 61 75 62 a9 7f 1f 78 f7 bc 4e 89 84 71 30 47 5b 4c 0f
+      var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+      store.Open(OpenFlags.ReadOnly);
+      foreach (var cert in store.Certificates)
+        Console.WriteLine(cert.GetCertHashString());
+
+      return;
+
+      var signed1 = new XmlDocument();
+      signed1.Load(@"\\gavinm\incoming\karisma\signed.xml");
+      var signature1 = signed1.SelectSingleNode("/Certificate/Signature").InnerText;
+
+      var hashBytes = KarismaLicenseSigner.Sign(
+        File.ReadAllBytes(@"\\gavinm\incoming\karisma\raw.xml"),
+        File.ReadAllBytes(@"\\gavinm\incoming\karisma\private.pvk"),
+        "jatrAtru7ecr"
+      );
+      var signature2 = Convert.ToBase64String(hashBytes);
+
+      Console.WriteLine(signature1 == signature2 ? "PASS" : "FAIL");
+      Console.ReadLine();
+    }
+  }
   class KarismaLicenseSigner {
     public static byte[] Sign(byte[] data, byte[] pvkBuffer, string pvkPassword) {
       var pvk = new PvkFile(pvkBuffer);
@@ -116,23 +145,6 @@ namespace CryptoTest {
       public static extern bool CryptImportKey(IntPtr hProv, byte[] pbData, int dwDataLen, IntPtr hPubKey, uint dwFlags, out IntPtr phKey);
       [DllImport("advapi32.dll", SetLastError = true)]
       public static extern bool CryptSignHash(IntPtr hHash, uint dwKeySpec, string sDescription, uint dwFlags, [Out] byte[] pbSignature, [In, Out] ref int pdwSignLen);
-    }
-  }
-  class Program {
-    static void Main(string[] args) {
-      var signed1 = new XmlDocument();
-      signed1.Load(@"\\gavinm\incoming\karisma\signed.xml");
-      var signature1 = signed1.SelectSingleNode("/Certificate/Signature").InnerText;
-      
-      var hashBytes = KarismaLicenseSigner.Sign(
-        File.ReadAllBytes(@"\\gavinm\incoming\karisma\raw.xml"),
-        File.ReadAllBytes(@"\\gavinm\incoming\karisma\private.pvk"), 
-        "jatrAtru7ecr"
-      );
-      var signature2 = Convert.ToBase64String(hashBytes);
-
-      Console.WriteLine(signature1 == signature2 ? "PASS" : "FAIL");
-      Console.ReadLine();
     }
   }
 }

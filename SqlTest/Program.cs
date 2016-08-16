@@ -39,9 +39,46 @@ namespace SqlTest {
       return result;
     }
 
+    [DebuggerNonUserCode]
+    static int _exec(SqlCommand cmd)
+    {
+      return cmd.ExecuteNonQuery();
+    }
+
     static void Main(string[] args) {
       Stopwatch timer;
 
+      using (var connection = new SqlConnection("Data Source=gavinm\\std12;Initial Catalog=ssb_helloworld;Integrated Security=SSPI"))
+      using (var command = connection.CreateCommand())
+      {
+        try
+        { 
+          connection.Open();
+          command.CommandText = "waitfor delay '00:00:10'";
+          /*command.CommandText = @"waitfor (
+  receive top (1)
+    @h = conversation_handle, @mt = message_type_name, @body = message_body
+  from StorageNotificationSinkQueue
+), timeout 10000;";
+          var h = command.Parameters.Add("h", System.Data.SqlDbType.UniqueIdentifier);
+          h.Direction = System.Data.ParameterDirection.Output;
+          var mt = command.Parameters.Add("mt", System.Data.SqlDbType.NVarChar, 128);
+          mt.Direction = System.Data.ParameterDirection.Output;
+          var body = command.Parameters.Add("body", System.Data.SqlDbType.VarBinary, -1);
+          body.Direction = System.Data.ParameterDirection.Output;*/
+
+          var t = new System.Threading.Timer(_ => command.Cancel(), null, TimeSpan.FromSeconds(3), Timeout.InfiniteTimeSpan);
+          
+          //command.ExecuteNonQuery();
+          _exec(command);
+        }
+        catch (SqlException ex)
+        {
+
+        }
+      }
+
+      return;
       using (var connection = new SqlConnection("Data Source=gavinm\\std12;Initial Catalog=capital_311;Integrated Security=SSPI"))
       using (var command = connection.CreateCommand())
       {
@@ -51,7 +88,7 @@ namespace SqlTest {
           while (reader.Read())
             Console.WriteLine(string.Format("{0}, {1}", reader[0], reader[1]));
       }
-      
+
       return;
 
       using (var connection = new OdbcConnection("Driver={SQL Server Native Client 11.0};Server=gavinm\\sql2012;Database=Perf_CAPITAL;Trusted_Connection=yes"))
