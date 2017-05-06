@@ -15,10 +15,17 @@ namespace LdapTest
   {
     static string AttributeOf(SearchResultEntry entry, string attr)
     {
-      return (string)entry.Attributes[attr]?.GetValues(typeof(string))[0];
+      var s = entry.Attributes[attr];
+      if (s == null)
+        return null;
+      return (string)s.GetValues(typeof(string))[0];
     }
     static void Main(string[] args)
     {
+      int pageSize = 1000;
+      //args = new[] { "kestral.local", "kestral.local" };
+      //args = new[] { "mn-ad-1", "mnadtest.local", "administrator", "number1!", "mnadtest" };        
+
       // LdapTest <address> <domain> [<username> <password> [<domain>]]
       //              0        1          2          3           4
       var directory = new LdapDirectoryIdentifier(args[0]);
@@ -37,28 +44,34 @@ namespace LdapTest
             new[] { "cn" }
           );
 
+          Console.WriteLine(request.TimeLimit);
+
           try
           {
             var t = Stopwatch.StartNew();
 
-            PageResultRequestControl pageRequestControl = new PageResultRequestControl(1000);
+            var pageRequestControl = new PageResultRequestControl(pageSize);
 
             // used to retrieve the cookie to send for the subsequent request
-            PageResultResponseControl pageResponseControl;
             request.Controls.Add(pageRequestControl);
+
+            // please please AD, give me the results
+            //request.Controls.Add(new SearchOptionsControl(System.DirectoryServices.Protocols.SearchOption.DomainScope));
 
             while (true)
             {
               var response = (SearchResponse)connection.SendRequest(request);
-              pageResponseControl = (PageResultResponseControl)response.Controls[0];
-              if (pageResponseControl.Cookie.Length == 0)
-                break;
-              pageRequestControl.Cookie = pageResponseControl.Cookie;
+
               Console.WriteLine("{0}\t{1} entries: {2} - {3} in {4:F1}", DateTime.Now, response.Entries.Count,
                 AttributeOf(response.Entries[0], "cn"),
                 AttributeOf(response.Entries[response.Entries.Count - 1], "cn"),
                 t.Elapsed.TotalSeconds
               );
+
+              var pageResponseControl = response.Controls.OfType<PageResultResponseControl>().First();
+              if (pageResponseControl.Cookie.Length == 0)
+                break;
+              pageRequestControl.Cookie = pageResponseControl.Cookie;
             }
             t.Stop();
           }
