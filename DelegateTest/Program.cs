@@ -81,6 +81,11 @@ namespace DelegateTest {
       Time("Delegate2", p.Test4);
       Time("Delegate3", p.Test6);
       Time("Delegate12", p.Test7);
+
+      int i = 0;
+      Action x = () => { i = 1; };
+      Action y = () => { Console.WriteLine(i); };
+
     }
   }
 }
