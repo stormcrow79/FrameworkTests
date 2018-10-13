@@ -22,6 +22,8 @@ namespace OdbcTest {
         connection.Open();
         using (var command = connection.CreateCommand()) {
           try {
+
+
             #region date - http://technet.microsoft.com/en-us/library/bb630352
             command.CommandText = "SELECT value FROM datetest WHERE value < { d '2012-02-15' }"; // OK
             //command.CommandText = "SELECT value FROM datetest WHERE value < ?"; 
