@@ -12,13 +12,18 @@ namespace ExpressionTest
         public string Surname { get; set; }
         public string FirstName { get; set; }
         public DateTime DateOfBirth { get; set; }
+        public string Deleted { get; set; }
     }
     class Program
     {
         static void Main(string[] args)
         {
+            Console.WriteLine($"property name: {nameof(Patient.DateOfBirth)}");
             Console.WriteLine($"property name: {GetPropertyName(p => p.DateOfBirth)}");
+            Console.WriteLine($"property value: {GetPropertyName(p => p.DateOfBirth)}");
         }
+
+
 
         static string GetPropertyName<TResult>(
             Expression<Func<Patient, TResult>> propertySelector,
